@@ -11,6 +11,7 @@ import android.content.IntentFilter
 import android.content.pm.LauncherApps
 import android.net.Uri
 import android.os.Bundle
+import android.os.UserHandle
 import android.os.UserManager
 import android.provider.AlarmClock
 import android.provider.CalendarContract
@@ -40,6 +41,7 @@ import com.jkuester.unlauncher.datastore.UnlauncherApp
 import com.sduduzog.slimlauncher.R
 import com.sduduzog.slimlauncher.adapters.AppDrawerAdapter
 import com.sduduzog.slimlauncher.adapters.HomeAdapter
+import com.sduduzog.slimlauncher.data.model.App
 import com.sduduzog.slimlauncher.databinding.HomeFragmentBottomBinding
 import com.sduduzog.slimlauncher.databinding.HomeFragmentContentBinding
 import com.sduduzog.slimlauncher.databinding.HomeFragmentDefaultBinding
@@ -71,6 +73,9 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
     private lateinit var receiver: BroadcastReceiver
     private lateinit var appDrawerAdapter: AppDrawerAdapter
     private lateinit var uninstallAppLauncher: ActivityResultLauncher<Intent>
+
+    // cached list of Apps list time we get it from BaseFragment
+    private var curPinnedShortcuts = listOf<App>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -189,6 +194,7 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
 
     private fun refreshApps() {
         val installedApps = getInstalledApps()
+        curPinnedShortcuts = installedApps.filter { it.appType == 1 }
         lifecycleScope.launch(Dispatchers.IO) {
             unlauncherDataSource.unlauncherAppsRepo.setApps(installedApps)
             viewModel.filterHomeApps(installedApps)
@@ -298,7 +304,12 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
         homeFragmentContent.appDrawerEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE && appDrawerAdapter.itemCount > 0) {
                 val firstApp = appDrawerAdapter.getFirstApp()
-                launchApp(firstApp.packageName, firstApp.className, firstApp.userSerial)
+                launch(
+                    firstApp.appType,
+                    firstApp.packageName,
+                    firstApp.className,
+                    firstApp.userSerial
+                )
                 homeFragment.transitionToStart()
                 true
             } else {
@@ -406,7 +417,7 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
     }
 
     override fun onLaunch(app: HomeApp, view: View) {
-        launchApp(app.packageName, app.activityName, app.userSerial)
+        launch(app.appType, app.packageName, app.activityName, app.userSerial)
     }
 
     override fun onBack(): Boolean {
@@ -426,19 +437,32 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
         }
     }
 
-    private fun launchApp(packageName: String, activityName: String, userSerial: Long) {
+    private fun launchAppAux(packageName: String, activityName: String, userSerial: Long) {
         try {
-            val manager = requireContext().getSystemService(Context.USER_SERVICE) as UserManager
-            val launcher = requireContext().getSystemService(
-                Context.LAUNCHER_APPS_SERVICE
-            ) as LauncherApps
-
+            val launcher = getLauncher()
             val componentName = ComponentName(packageName, activityName)
-            val userHandle = manager.getUserForSerialNumber(userSerial)
-
+            val userHandle = getUserHandle(userSerial)
             launcher.startMainActivity(componentName, userHandle, view?.clipBounds, null)
         } catch (e: Exception) {
-            // Do no shit yet
+            Toast.makeText(context, R.string.couldnt_start_app, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun launchShortcutAux(packageName: String, activityName: String, userSerial: Long) {
+        try {
+            val launcher = getLauncher()
+            val userHandle = getUserHandle(userSerial)
+            launcher.startShortcut(packageName, activityName, view?.clipBounds, null, userHandle)
+        } catch (e: Exception) {
+            Toast.makeText(context, R.string.couldnt_start_shortcut, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun launch(appType: Int, packageName: String, activityName: String, userSerial: Long) {
+        when (appType) {
+            0 -> launchAppAux(packageName, activityName, userSerial)
+            1,
+            2 -> launchShortcutAux(packageName, activityName, userSerial)
         }
     }
 
@@ -454,10 +478,9 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
         fun onAppLongClicked(app: UnlauncherApp, view: View): Boolean {
             val popupMenu = PopupMenu(context, view)
             popupMenu.inflate(R.menu.app_long_press_menu)
-            hideUninstallOptionIfSystemApp(app, popupMenu)
+            hideOptionsMaybe(app, popupMenu)
 
             popupMenu.setOnMenuItemClickListener { item: MenuItem? ->
-
                 when (item!!.itemId) {
                     R.id.open -> {
                         onAppClicked(app)
@@ -472,7 +495,7 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
                         unlauncherDataSource.unlauncherAppsRepo.updateDisplayInDrawer(app, false)
                         Toast.makeText(
                             context,
-                            "Unhide under Unlauncher's Options > Customize Drawer > Visible Apps",
+                            R.string.unhide_hint,
                             Toast.LENGTH_LONG
                         ).show()
                     }
@@ -483,9 +506,42 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
                         ).show(childFragmentManager, "AppListAdapter")
                     }
                     R.id.uninstall -> {
-                        val intent = Intent(Intent.ACTION_DELETE)
-                        intent.data = Uri.parse("package:" + app.packageName)
-                        uninstallAppLauncher.launch(intent)
+                        if (app.appType == 0) {
+                            val intent = Intent(Intent.ACTION_DELETE)
+                            intent.data = Uri.parse("package:" + app.packageName)
+                            uninstallAppLauncher.launch(intent)
+                        }
+                    }
+                    R.id.remove -> {
+                        if (app.appType == 1) {
+                            var ids = curPinnedShortcuts.filter {
+                                it.packageName == app.packageName &&
+                                    it.activityName != app.className
+                            }.map {
+                                it.activityName
+                            }
+                            val userHandle = getUserHandle(app.userSerial)
+                            try {
+                                val launcher = getLauncher()
+                                launcher.pinShortcuts(app.packageName, ids, userHandle)
+                            } catch (e: IllegalStateException) {
+                                Toast.makeText(
+                                    context,
+                                    R.string.unable_to_unpin,
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } catch (e: SecurityException) {
+                                Toast.makeText(
+                                    context,
+                                    R.string.unable_to_unpin,
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                            refreshApps()
+                            Toast.makeText(context, R.string.shortcut_unpinned, Toast.LENGTH_LONG)
+                                .show()
+                            backHome()
+                        }
                     }
                 }
                 true
@@ -502,19 +558,43 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
             return true
         }
 
-        private fun hideUninstallOptionIfSystemApp(app: UnlauncherApp, popupMenu: PopupMenu) {
+        private fun hideOptionsMaybe(app: UnlauncherApp, popupMenu: PopupMenu) {
             val pm = requireContext().packageManager
             val info = pm.getApplicationInfo(app.packageName, 0)
-            if (info.isSystemApp()) {
-                val uninstallMenuItem = popupMenu.menu.findItem(R.id.uninstall)
-                uninstallMenuItem.isVisible = false
+            // System apps and shortcuts cannot be uninstalled
+            if (info.isSystemApp() || (app.appType != 0)) {
+                val item = popupMenu.menu.findItem(R.id.uninstall)
+                item.isVisible = false
+            }
+            // Except for pinned shortcuts, nothing else can be removed:
+            if (app.appType != 1) {
+                val item = popupMenu.menu.findItem(R.id.remove)
+                item.isVisible = false
             }
         }
 
         fun onAppClicked(app: UnlauncherApp) {
-            launchApp(app.packageName, app.className, app.userSerial)
+            launch(app.appType, app.packageName, app.className, app.userSerial)
+            backHome()
+        }
+
+        fun backHome() {
             val homeFragment = HomeFragmentDefaultBinding.bind(requireView()).root
             homeFragment.transitionToStart()
         }
+    }
+
+    private fun getManager(): UserManager {
+        return requireContext().getSystemService(Context.USER_SERVICE) as UserManager
+    }
+
+    private fun getLauncher(): LauncherApps {
+        return requireContext().getSystemService(
+            Context.LAUNCHER_APPS_SERVICE
+        ) as LauncherApps
+    }
+
+    private fun getUserHandle(userSerial: Long): UserHandle {
+        return getManager().getUserForSerialNumber(userSerial)
     }
 }
