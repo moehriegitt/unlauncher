@@ -11,7 +11,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 class AnalogClockView(context: Context, attrs: AttributeSet) : ClockView(context, attrs) {
-    private var handPaint = getColorPaint(R.attr.colorAccent)
+    private var handPaint = getColorPaint(R.attr.thirdColor)
     private var radius: Float
     private var border: Float
 

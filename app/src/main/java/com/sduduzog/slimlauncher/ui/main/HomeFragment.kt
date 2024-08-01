@@ -234,7 +234,9 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
                     prefs.leftButton.iconId
                 )
                 homeFragmentContent.homeFragmentCall.setImageResource(leftButtonIcon)
+                var anyOn = false
                 if (leftButtonIcon != R.drawable.ic_empty) {
+                    anyOn = true
                     homeFragmentContent.homeFragmentCall.setOnClickListener { view ->
                         try {
                             val pm = context?.packageManager!!
@@ -258,6 +260,7 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
                 )
                 homeFragmentContent.homeFragmentOptions.setImageResource(centerButtonIcon)
                 if (centerButtonIcon != R.drawable.ic_empty) {
+                    anyOn = true
                     homeFragmentContent.homeFragmentOptions.setOnClickListener(
                         Navigation.createNavigateOnClickListener(
                             R.id.action_homeFragment_to_optionsFragment
@@ -270,6 +273,7 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
                 )
                 homeFragmentContent.homeFragmentCamera.setImageResource(rightButtonIcon)
                 if (rightButtonIcon != R.drawable.ic_empty) {
+                    anyOn = true
                     homeFragmentContent.homeFragmentCamera.setOnClickListener {
                         try {
                             val intent = Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
@@ -279,6 +283,11 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
                         }
                     }
                 }
+
+                val vis = if (anyOn) View.VISIBLE else View.GONE
+                homeFragmentContent.homeFragmentCall.visibility = vis
+                homeFragmentContent.homeFragmentOptions.visibility = vis
+                homeFragmentContent.homeFragmentCamera.visibility = vis
             }
 
         homeFragmentContent.appDrawerEditText.addTextChangedListener(
