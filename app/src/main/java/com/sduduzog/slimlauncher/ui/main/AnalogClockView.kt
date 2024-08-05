@@ -19,7 +19,7 @@ class AnalogClockView(context: Context, attrs: AttributeSet) : ClockView(context
     private val handWidthHour = 10F
     private val handWidthMinute = 5F
     private val handLengthHour = .6F
-    private val handLengthMinute = .8F
+    private val handLengthMinute = .91F
 
     private val tickWidth = 4F
     private val tickLength = 1F - .1F
@@ -52,7 +52,7 @@ class AnalogClockView(context: Context, attrs: AttributeSet) : ClockView(context
         super.onDraw(canvas)
         val calendar = Calendar.getInstance()
 
-        val hour = calendar[Calendar.HOUR] % 12
+        val hour = calendar[Calendar.HOUR]
         val minute = calendar[Calendar.MINUTE]
         var minuteF = minute / 60F
         var hourF = (hour + minuteF) / 12F
