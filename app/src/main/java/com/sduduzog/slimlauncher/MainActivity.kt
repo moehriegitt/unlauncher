@@ -22,6 +22,7 @@ import com.sduduzog.slimlauncher.utils.HomeWatcher
 import com.sduduzog.slimlauncher.utils.IPublisher
 import com.sduduzog.slimlauncher.utils.ISubscriber
 import com.sduduzog.slimlauncher.utils.SystemUiManager
+import com.sduduzog.slimlauncher.utils.WallpaperManager
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.reflect.Method
 import java.util.Locale
@@ -34,6 +35,8 @@ class MainActivity :
     SharedPreferences.OnSharedPreferenceChangeListener,
     HomeWatcher.OnHomePressedListener,
     IPublisher {
+
+    private val wallpaperManager = WallpaperManager(this)
 
     @Inject
     lateinit var systemUiManager: SystemUiManager
@@ -136,6 +139,15 @@ class MainActivity :
         if (s.equals(getString(R.string.prefs_settings_key_toggle_status_bar), true)) {
             systemUiManager.setSystemUiVisibility()
         }
+    }
+
+    override fun onApplyThemeResource(
+        theme: Resources.Theme?,
+        @StyleRes resid: Int,
+        first: Boolean
+    ) {
+        super.onApplyThemeResource(theme, resid, first)
+        wallpaperManager.onApplyThemeResource(theme, resid)
     }
 
     override fun setTheme(resId: Int) {
