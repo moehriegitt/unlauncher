@@ -67,6 +67,9 @@
         <item>Mostra 01, 02, 03, ...</item>
     </string-array>
 
+    <string name="options_fragment_use_conlang">Localizzazione Tircunana.</string>
+    <string name="options_fragment_use_conlang_true">Utilizza la localizzazione Tircunana.</string>
+    <string name="options_fragment_use_conlang_false">Utilizza la localizzazione predefinita.</string>
     <string name="add_apps_fragment_search_apps">Cerca</string>
     <string name="app_info">Informazioni sull\'applicazione</string>
     <string name="choose_alignment_dialog_title">Allineamento del testo</string>

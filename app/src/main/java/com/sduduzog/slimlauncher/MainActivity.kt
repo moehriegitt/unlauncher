@@ -28,6 +28,7 @@ import com.sduduzog.slimlauncher.utils.SystemUiManager
 import com.sduduzog.slimlauncher.utils.WallpaperManager
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.reflect.Method
+import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
@@ -42,6 +43,7 @@ class MainActivity :
 
     @Inject
     lateinit var systemUiManager: SystemUiManager
+    private lateinit var origLocale: Locale
     private lateinit var settings: SharedPreferences
     private lateinit var navigator: NavController
     private lateinit var homeWatcher: HomeWatcher
@@ -81,6 +83,11 @@ class MainActivity :
         navigator = navHostFragment.navController
         homeWatcher = HomeWatcher.createInstance(this)
         homeWatcher.setOnHomePressedListener(this)
+
+        origLocale = Locale.getDefault()
+        if (settings.getBoolean(getString(R.string.prefs_settings_use_qtk_locale), false)) {
+            setLocale("qtk")
+        }
     }
 
     override fun onResume() {
@@ -109,12 +116,31 @@ class MainActivity :
         if (hasFocus) systemUiManager.setSystemUiVisibility()
     }
 
+    private fun setLocale(locale: Locale) {
+        val activity = this
+        Locale.setDefault(locale)
+        val resources = activity.getResources()
+        val config = resources.getConfiguration()
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.getDisplayMetrics())
+    }
+
+    private fun setLocale(languageCode: String) {
+        setLocale(Locale(languageCode))
+    }
+
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, s: String?) {
         if (
             s.equals(getString(R.string.prefs_settings_key_theme), true) ||
             s.equals(getString(R.string.prefs_settings_key_dark_mode), true) ||
             s.equals(getString(R.string.prefs_settings_key_font), true)
         ) {
+            recreate()
+        }
+        if (s.equals(getString(R.string.prefs_settings_use_qtk_locale), true)) {
+            if (!settings.getBoolean(getString(R.string.prefs_settings_use_qtk_locale), false)) {
+                setLocale(origLocale)
+            }
             recreate()
         }
         if (s.equals(getString(R.string.prefs_settings_key_toggle_status_bar), true)) {

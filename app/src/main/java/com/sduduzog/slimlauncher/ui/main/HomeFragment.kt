@@ -57,6 +57,7 @@ import com.sduduzog.slimlauncher.utils.OnLaunchAppListener
 import com.sduduzog.slimlauncher.utils.isSystemApp
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
@@ -412,8 +413,52 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
         homeFragmentContent.homeFragmentTime.text = fixLead0(fWatchTime.format(Date()))
     }
 
-    private fun strDate(dateTempl: String): String =
-        SimpleDateFormat(dateTempl, Locale.getDefault()).format(Date())
+    private fun patchDateTempl(dateTempl: String): String {
+        // for default values, do not replace month/day strings
+        if (resources.getTextArray(R.array.day_abbrs)[0] == "") {
+            return dateTempl
+        }
+
+        // otherwise, use special tags to replace the month/day after formatting
+        return dateTempl
+            .replace("EEEE", "#+")
+            .replace("EEE", "#-")
+            .replace("EE", "#-")
+            .replace("MMMM", "#*")
+            .replace("MMM", "#/")
+    }
+
+    private fun patchDateStr(dateStr: String): String {
+        if (!dateStr.contains("#")) {
+            return dateStr
+        }
+
+        val cal = Calendar.getInstance()
+
+        // The DAY_OF_WEEK absolute value depends on the locale -- but we
+        // want to index our array always as Sunday==0, Monday==1.  So do
+        // some shenanigans to move it into the 0..6 range with 0=Sun:
+        val dayI = (7 + cal[Calendar.DAY_OF_WEEK] - Calendar.SUNDAY) % 7
+        val dayL = resources.getTextArray(R.array.day_names)[dayI].toString()
+        val dayS = resources.getTextArray(R.array.day_abbrs)[dayI].toString()
+
+        // Just to be sure, do the same with January:
+        val monI = (12 + cal[Calendar.MONTH] - Calendar.JANUARY) % 12
+        val monL = resources.getTextArray(R.array.mon_names)[monI].toString()
+        val monS = resources.getTextArray(R.array.mon_abbrs)[monI].toString()
+
+        return dateStr
+            .replace("#+", dayL)
+            .replace("#-", dayS)
+            .replace("#*", monL)
+            .replace("#/", monS)
+    }
+
+    private fun strDate(dateTempl: String): String {
+        return patchDateStr(
+            SimpleDateFormat(patchDateTempl(dateTempl), Locale.getDefault()).format(Date())
+        )
+    }
 
     private fun removeLead0(s: String): String {
         var t = StringBuilder()
@@ -470,10 +515,22 @@ class HomeFragment : BaseFragment(), OnLaunchAppListener {
             ?.getInt(getString(R.string.prefs_settings_key_date_format), 0)
         val dateStr = when (dateFormat) {
             MyDateFormat.date_short.number -> {
-                android.text.format.DateFormat.getDateFormat(context).format(Date())
+                val format = resources.getString(R.string.sys_date_short).toString()
+                if (format != "") {
+                    strDate(format)
+                } else {
+                    android.text.format.DateFormat.getDateFormat(context).format(Date())
+                }
             }
             MyDateFormat.date_medium.number -> {
-                android.text.format.DateFormat.getMediumDateFormat(context).format(Date())
+                val format = resources.getString(R.string.sys_date_medium).toString()
+                if (format != "") {
+                    strDate(format)
+                } else {
+                    patchDateStr(
+                        android.text.format.DateFormat.getMediumDateFormat(context).format(Date())
+                    )
+                }
             }
             MyDateFormat.date_iso.number -> strDate(getString(R.string.iso_date_format))
             MyDateFormat.date_iso_wday.number -> strDate(getString(R.string.iso_wday_date_format))

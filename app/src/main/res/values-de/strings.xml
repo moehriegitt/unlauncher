@@ -68,6 +68,9 @@
         <item>Lieber 01, 02, 03, ...</item>
     </string-array>
 
+    <string name="options_fragment_use_conlang">Tirkunan</string>
+    <string name="options_fragment_use_conlang_true">Tirkunan in Menüs verwenden.</string>
+    <string name="options_fragment_use_conlang_false">Systemspracheinstellung benutzen.</string>
     <string name="add_apps_fragment_search_apps">Suche</string>
     <string name="app_info">App-Info</string>
     <string name="choose_alignment_dialog_title">Textausrichtung</string>

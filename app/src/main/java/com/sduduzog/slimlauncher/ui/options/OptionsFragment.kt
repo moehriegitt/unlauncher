@@ -171,6 +171,15 @@ class OptionsFragment : BaseFragment(), SharedPreferences.OnSharedPreferenceChan
                 R.string.customize_app_drawer_fragment_show_headings_subtitle
             )
 
+        fragment.optionsFragmentUseConlangSwitch
+            .setOnCheckedChangeListener { _, checked ->
+                settings.edit {
+                    putBoolean(getString(R.string.prefs_settings_use_qtk_locale), checked)
+                }
+                updateUseConlang()
+            }
+        updateUseConlang()
+
         fragment.optionsFragmentShowSearchFieldSwitch
             .setOnCheckedChangeListener { _, checked ->
                 prefsRepo.updateShowSearchBar(checked)
@@ -217,6 +226,21 @@ class OptionsFragment : BaseFragment(), SharedPreferences.OnSharedPreferenceChan
                 requireContext(), R.string.options_fragment_search_all,
                 R.string.options_fragment_search_all_subtitle
             )
+    }
+
+    private fun updateUseConlang() {
+        val active = settings.getBoolean(getString(R.string.prefs_settings_use_qtk_locale), false)
+        val fragment = OptionsFragmentBinding.bind(requireView())
+        fragment.optionsFragmentUseConlangSwitch.isChecked = active
+        fragment.optionsFragmentUseConlangSwitch.text = createTitleAndSubtitleText(
+            requireContext(),
+            getText(R.string.options_fragment_use_conlang),
+            if (active) {
+                getText(R.string.options_fragment_use_conlang_true)
+            } else {
+                getText(R.string.options_fragment_use_conlang_false)
+            }
+        )
     }
 
     private fun updateThemeSubtitle() {

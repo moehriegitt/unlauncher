@@ -162,6 +162,18 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/options_fragment_choose_alignment" />
 
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/options_fragment_use_conlang_switch"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_list_items"
+                android:layout_width="match_parent"
+                android:text="@string/options_fragment_use_conlang"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                android:textColor="?switchTextColor"
+                android:textSize="@dimen/font_size_customize_options"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/options_fragment_toggle_status_bar" />
+
             <!-- Drawer -->
             <TextView
                 android:id="@+id/options_section_drawer"
@@ -173,7 +185,7 @@
                 android:textColor="?headerTextColor"
                 android:textSize="@dimen/font_size_customize_title2"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/options_fragment_toggle_status_bar" />
+                app:layout_constraintTop_toBottomOf="@+id/options_fragment_use_conlang_switch" />
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/options_fragment_show_headings_switch"

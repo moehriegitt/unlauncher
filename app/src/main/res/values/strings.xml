@@ -74,6 +74,67 @@
         <item>Prefer 01, 02, 03, ...</item>
     </string-array>
 
+    <!--
+    Preparations to translate to Tircunan (lang-code: qtk), unknown to Java
+    This is only basic support, not all date/time formats are patched to
+    support this.
+    -->
+    <string-array name="day_names">
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+    </string-array>
+    <string-array name="day_abbrs">
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+    </string-array>
+    <string-array name="mon_names">
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+    </string-array>
+    <string-array name="mon_abbrs">
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+    </string-array>
+
+    <string name="prefs_settings_use_qtk_locale" translatable="false">use_qtk_locale</string>
+
+    <string name="options_fragment_use_conlang">Tircunan locale</string>
+    <string name="options_fragment_use_conlang_true">Use custom Tircunan locale (qtk).</string>
+    <string name="options_fragment_use_conlang_false">Use application locale.</string>
+
+    <string name="sys_date_short"></string>
+    <string name="sys_date_medium"></string>
+
     <string name="app_name" translatable="false">Unlauncher</string>
     <string name="main_placeholder_clock" translatable="false">00:00</string>
     <string name="main_placeholder_date" translatable="false">Sat, Apr 20</string>
