@@ -111,6 +111,8 @@
     </string-array>
 
     <string name="main_date_format">EEEE, MMMM d</string>
+    <string name="options_fragment_use_conlang_true">Mpric lucivicar Tircunan (qtk).</string>
+    <string name="options_fragment_use_conlang_false">Mpric lucivicar pricufiurat.</string>
     <string name="sys_date_short">yyyy-MM-dd</string>
     <string name="sys_date_medium">EEE, yyyy MMM d</string>
     <string name="add_apps_fragment_search_apps">Cric apricar</string>
@@ -164,7 +166,13 @@
     <string name="action_add_shortcut">Aiumbi a trait apricar</string>
     <string name="unhide_hint">Rimust ni cufiurar &gt; Apricar trait</string>
     <string name="unable_to_unpin">Irul cur strai</string>
-    <string name="shortcut_unpinned">Verknüpfung entfernt</string>
+    <string name="shortcut_unpinned">Strait</string>
     <string name="couldnt_start_app">Irul cur api</string>
     <string name="couldnt_start_shortcut">Irul cur api</string>
+    <string name="customize_app_drawer_fragment_wallpaper_not_default_launcher">Cil apricar deu e cumintur.</string>
+    <string name="customize_app_drawer_fragment_wallpaper_enabled">Culur trafun difini trafun papil.</string>
+    <string name="customize_app_drawer_fragment_wallpaper_disabled">Trafun papil rest cum e.</string>
+    <string name="customize_app_drawer_fragment_wallpaper_text">Direi trafun papil.</string>
+    <string name="customize_app_drawer_search_bar_enabled">Mustat</string>
+    <string name="customize_app_drawer_search_bar_disabled">Ascunat</string>
 </resources>
