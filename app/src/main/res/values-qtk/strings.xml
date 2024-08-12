@@ -120,8 +120,8 @@
     <string name="options_fragment_use_conlang_false">Mpric lucivicad pricufiurad.</string>
     <string name="sys_date_short">yyyy-MM-dd</string>
     <string name="sys_date_medium">EEE, yyyy MMM d</string>
-    <string name="add_apps_fragment_search_apps">Cric apricad</string>
-    <string name="app_info">Mfrumumbe apricad</string>
+    <string name="add_apps_fragment_search_apps">Cric</string>
+    <string name="app_info">Pru</string>
     <string name="choose_alignment_dialog_title">Alinad test</string>
     <string name="choose_clock_type_dialog_title">Tip ruloi</string>
     <string name="choose_search_bar_position_dialog_title">Pusid trau cric</string>
